@@ -22,50 +22,49 @@ import (
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
-// MyTypeParameters are the configurable fields of a MyType.
-type MyTypeParameters struct {
-	Command string `json:"command"`
+// FileParameters are the configurable fields of a File.
+type FileParameters struct {
+	File string `json:"file"`
 }
 
-// MyTypeObservation are the observable fields of a MyType.
-type MyTypeObservation struct {
-	ObservableField string `json:"observableField,omitempty"`
+// FileObservation are the observable fields of a File.
+type FileObservation struct {
+	Status string `json:"status,omitempty"`
 }
 
-// A MyTypeSpec defines the desired state of a MyType.
-type MyTypeSpec struct {
+// A FileSpec defines the desired state of a File.
+type FileSpec struct {
 	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       MyTypeParameters `json:"forProvider"`
+	ForProvider       FileParameters `json:"forProvider"`
 }
 
-// A MyTypeStatus represents the observed state of a MyType.
-type MyTypeStatus struct {
+// A FileStatus represents the observed state of a File.
+type FileStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          MyTypeObservation `json:"atProvider,omitempty"`
+	AtProvider          FileObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
-
-// A MyType is an example API type.
+// A File is an example API type.
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="STATUS",type="string",JSONPath=".status.bindingPhase"
-// +kubebuilder:printcolumn:name="STATE",type="string",JSONPath=".status.atProvider.state"
+// +kubebuilder:printcolumn:name="FILE",type="date",JSONPath=".spec.providerConfigRef.name"
+// +kubebuilder:printcolumn:name="STATUS",type="string",JSONPath=".status.atProvider.status"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // Please replace `PROVIDER-NAME` with your actual provider name, like `aws`, `azure`, `gcp`, `alibaba`
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,example}
-type MyType struct {
+// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,ssh}
+type File struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   MyTypeSpec   `json:"spec"`
-	Status MyTypeStatus `json:"status,omitempty"`
+	Spec   FileSpec   `json:"spec"`
+	Status FileStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// MyTypeList contains a list of MyType
-type MyTypeList struct {
+// FileList contains a list of File
+type FileList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []MyType `json:"items"`
+	Items           []File `json:"items"`
 }

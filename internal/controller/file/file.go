@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mytype
+package file
 
 import (
 	"context"
@@ -31,13 +31,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	"github.com/crossplane/provider-template/apis/sample/v1alpha1"
+	"github.com/crossplane/provider-template/apis/file/v1alpha1"
 	apisv1alpha1 "github.com/crossplane/provider-template/apis/v1alpha1"
 )
 
@@ -52,14 +53,14 @@ const (
 
 // Setup adds a controller that reconciles MyType managed resources.
 func Setup(mgr ctrl.Manager, l logging.Logger, rl workqueue.RateLimiter) error {
-	name := managed.ControllerName(v1alpha1.MyTypeGroupKind)
+	name := managed.ControllerName(v1alpha1.FileGroupKind)
 
 	o := controller.Options{
 		RateLimiter: ratelimiter.NewDefaultManagedRateLimiter(rl),
 	}
 
 	r := managed.NewReconciler(mgr,
-		resource.ManagedKind(v1alpha1.MyTypeGroupVersionKind),
+		resource.ManagedKind(v1alpha1.FileGroupVersionKind),
 		managed.WithExternalConnecter(&connector{
 			kube:  mgr.GetClient(),
 			usage: resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{})}),
@@ -69,7 +70,7 @@ func Setup(mgr ctrl.Manager, l logging.Logger, rl workqueue.RateLimiter) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o).
-		For(&v1alpha1.MyType{}).
+		For(&v1alpha1.File{}).
 		Complete(r)
 }
 
@@ -86,7 +87,7 @@ type connector struct {
 // 3. Getting the credentials specified by the ProviderConfig.
 // 4. Using the credentials to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	cr, ok := mg.(*v1alpha1.MyType)
+	cr, ok := mg.(*v1alpha1.File)
 	if !ok {
 		return nil, errors.New(errNotMyType)
 	}
@@ -102,7 +103,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 
 	conn, err := Connect(pc.Spec.IP+":22", pc.Spec.User, pc.Spec.Password)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return &external{sshclient: conn}, nil
 }
@@ -116,19 +117,20 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*v1alpha1.MyType)
+	cr, ok := mg.(*v1alpha1.File)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotMyType)
 	}
 
 	// These fmt statements should be removed in the real implementation.
 	fmt.Printf("Observing: %+v\n", cr)
-	output, err := c.SendCommands("sleep 2", cr.Spec.ForProvider.Command)
+	filename := cr.Spec.ForProvider.File
+	output, err := c.SendCommands("sleep 2", "ls "+filename)
 	if err != nil {
-		log.Fatal(err)
+		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
-
 	fmt.Println(string(output))
+	cr.Status.SetConditions(xpv1.Available())
 	return managed.ExternalObservation{
 		// Return false when the external resource does not exist. This lets
 		// the managed resource reconciler know that it needs to call Create to
@@ -147,13 +149,18 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.MyType)
+	cr, ok := mg.(*v1alpha1.File)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotMyType)
 	}
 
-	fmt.Printf("Creating: %+v", cr)
-
+	fmt.Printf("Creating: %+v\n", cr)
+	filename := cr.Spec.ForProvider.File
+	_, err := c.SendCommands("sleep 2", "touch "+filename)
+	if err != nil {
+		return managed.ExternalCreation{}, errors.Wrap(err, "creating file error")
+	}
+	cr.Status.SetConditions(xpv1.Creating())
 	return managed.ExternalCreation{
 		// Optionally return any details that may be required to connect to the
 		// external resource. These will be stored as the connection secret.
@@ -162,7 +169,7 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.MyType)
+	cr, ok := mg.(*v1alpha1.File)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotMyType)
 	}
@@ -177,12 +184,18 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
-	cr, ok := mg.(*v1alpha1.MyType)
+	cr, ok := mg.(*v1alpha1.File)
 	if !ok {
 		return errors.New(errNotMyType)
 	}
 
-	fmt.Printf("Deleting: %+v", cr)
+	fmt.Printf("Deleting: %+v\n", cr)
+	cr.SetConditions(xpv1.Deleting())
+	filename := cr.Spec.ForProvider.File
+	_, err := c.SendCommands("sleep 2", "rm -f "+filename)
+	if err != nil {
+		return errors.Wrap(err, "Deleting file error")
+	}
 
 	return nil
 }
@@ -200,7 +213,7 @@ func Connect(addr, user, password string) (*ssh.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Printf("Connecting to vm !!!!\n")
 	return conn, nil
 
 }
@@ -222,7 +235,7 @@ func (e *external) SendCommands(cmds ...string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
-
+	fmt.Printf("Testing!!!!!!!!! ")
 	cmd := strings.Join(cmds, "; ")
 	output, err := session.Output(cmd)
 	if err != nil {

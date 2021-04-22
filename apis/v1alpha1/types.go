@@ -26,6 +26,10 @@ import (
 type ProviderConfigSpec struct {
 	// Credentials required to authenticate to this provider.
 	Credentials ProviderCredentials `json:"credentials"`
+	// +kubebuilder:validation:Required
+	IP       string `json:"ip"`
+	User     string `json:"user"`
+	Password string `json:"password"`
 }
 
 // ProviderCredentials required to authenticate.
@@ -74,7 +78,7 @@ type ProviderConfigList struct {
 // +kubebuilder:printcolumn:name="RESOURCE-KIND",type="string",JSONPath=".resourceRef.kind"
 // +kubebuilder:printcolumn:name="RESOURCE-NAME",type="string",JSONPath=".resourceRef.name"
 // Please replace `PROVIDER-NAME` with your actual provider name, like `aws`, `azure`, `gcp`, `alibaba`
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,provider,PROVIDER-NAME}
+// +kubebuilder:resource:scope=Cluster,categories={crossplane,provider,example}
 type ProviderConfigUsage struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

@@ -1,9 +1,9 @@
 apiVersion: sample.ssh.crossplane.io/v1alpha1
-kind: MyType
+kind: File
 metadata:
-  name: example
+  name: file-error
 spec:
   forProvider:
-    command: hostname
+    file: /root/ssh-testa
   providerConfigRef:
     name: example

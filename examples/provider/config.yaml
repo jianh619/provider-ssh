@@ -5,13 +5,16 @@ metadata:
   name: example-provider-secret
 type: Opaque
 data:
-  # credentials: BASE64ENCODED_PROVIDER_CREDS
+  credentials: pass
 ---
-apiVersion: template.crossplane.io/v1alpha1
+apiVersion: ssh.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
   name: example
 spec:
+  ip: 9.46.86.53 
+  user: root
+  password: Zhu88jie~
   credentials:
     source: Secret
     secretRef:

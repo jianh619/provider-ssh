@@ -37,14 +37,14 @@ var (
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 )
 
-// MyType type metadata.
+// File type metadata.
 var (
-	MyTypeKind             = reflect.TypeOf(MyType{}).Name()
-	MyTypeGroupKind        = schema.GroupKind{Group: Group, Kind: MyTypeKind}.String()
-	MyTypeKindAPIVersion   = MyTypeKind + "." + SchemeGroupVersion.String()
-	MyTypeGroupVersionKind = SchemeGroupVersion.WithKind(MyTypeKind)
+	FileKind             = reflect.TypeOf(File{}).Name()
+	FileGroupKind        = schema.GroupKind{Group: Group, Kind: FileKind}.String()
+	FileKindAPIVersion   = FileKind + "." + SchemeGroupVersion.String()
+	FileGroupVersionKind = SchemeGroupVersion.WithKind(FileKind)
 )
 
 func init() {
-	SchemeBuilder.Register(&MyType{}, &MyTypeList{})
+	SchemeBuilder.Register(&File{}, &FileList{})
 }
