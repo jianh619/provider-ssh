@@ -47,7 +47,6 @@ type FileStatus struct {
 // +kubebuilder:object:root=true
 // A File is an example API type.
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="FILE",type="date",JSONPath=".spec.providerConfigRef.name"
 // +kubebuilder:printcolumn:name="STATUS",type="string",JSONPath=".status.atProvider.status"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // Please replace `PROVIDER-NAME` with your actual provider name, like `aws`, `azure`, `gcp`, `alibaba`

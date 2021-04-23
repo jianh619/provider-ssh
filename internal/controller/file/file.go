@@ -131,6 +131,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}
 	fmt.Println(string(output))
 	cr.Status.SetConditions(xpv1.Available())
+	cr.Status.AtProvider.Status = "Available"
 	return managed.ExternalObservation{
 		// Return false when the external resource does not exist. This lets
 		// the managed resource reconciler know that it needs to call Create to

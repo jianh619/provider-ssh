@@ -19,9 +19,6 @@ spec:
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.providerConfigRef.name
-      name: FILE
-      type: date
     - jsonPath: .status.atProvider.status
       name: STATUS
       type: string
