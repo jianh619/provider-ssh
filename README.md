@@ -1,7 +1,7 @@
 # provider-ssh
 
 `provider-ssh` is a minimal [Crossplane](https://crossplane.io/) Provider
-, which will help connecting to remote vm and do something .
+, which helps connecting to remote vm and do something .
 
 
 ## Getting Started
@@ -49,7 +49,7 @@ make run
 **Note:** You need speicify ip/user/password for connecting this vm 
 
 then create provider-config in your kubernetes cluster
-```
+```console
 kubectl apply -f examples/provider/config.yaml
 ```
 
@@ -60,6 +60,8 @@ kubectl apply -f examples/sample/file.yaml
 ```
 
 It will make sure there's a file named `ssh-test` in your remote VM (/root/ssh-test)
+
+  
 
 ## Developing
 
