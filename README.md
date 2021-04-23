@@ -22,6 +22,7 @@ git clone https://github.com/jianh619/provider-ssh.git
 - Run against a Kubernetes cluster:
 
 ```console
+cd provider-ssh
 make run
 ```
 
@@ -45,8 +46,9 @@ make run
        name: example-provider-secret
        key: credentials
 ```
-**Note:** You need speicify ip/user/password for connecting this vm :
+**Note:** You need speicify ip/user/password for connecting this vm 
 
+then create provider-config in your kubernetes cluster
 ```
 kubectl apply -f examples/provider/config.yaml
 ```

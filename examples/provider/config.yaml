@@ -12,9 +12,9 @@ kind: ProviderConfig
 metadata:
   name: example
 spec:
-  ip: 9.46.86.53 
-  user: root
-  password: Zhu88jie~
+  ip: <ip>
+  user: <user>
+  password: <password>
   credentials:
     source: Secret
     secretRef:
